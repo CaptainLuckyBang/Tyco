@@ -1,0 +1,9 @@
+{
+  "type": "tyco:shop_entry",
+  "item": {
+    "id": "minecraft:emerald",
+    "count": 1
+  },
+  "price": 45,
+  "category": "Materials"
+}

@@ -1,0 +1,9 @@
+{
+  "type": "tyco:shop_entry",
+  "item": {
+    "id": "minecraft:bucket",
+    "count": 1
+  },
+  "price": 80,
+  "category": "Tools"
+}

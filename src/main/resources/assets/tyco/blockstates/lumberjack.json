@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "upgrade_tier=0": { "model": "tyco:block/lumberjack_untinted" },
+    "upgrade_tier=1": { "model": "tyco:block/lumberjack" },
+    "upgrade_tier=2": { "model": "tyco:block/lumberjack" },
+    "upgrade_tier=3": { "model": "tyco:block/lumberjack" },
+    "upgrade_tier=4": { "model": "tyco:block/lumberjack" },
+    "upgrade_tier=5": { "model": "tyco:block/lumberjack" }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "tyco:generating",
+  "machine": "miner",
+  "blocks": ["minecraft:bedrock"],
+  "coin_input": { "item": "tyco:coal_coin" },
+  "coin_count": 6,
+  "outputs": [
+    { "item": "minecraft:raw_iron", "weight": 50, "min_count": 1, "max_count": 1 },
+    { "item": "minecraft:raw_copper", "weight": 30, "min_count": 1, "max_count": 1 },
+    { "item": "minecraft:raw_gold", "weight": 15, "min_count": 1, "max_count": 1 },
+    { "item": "minecraft:diamond", "weight": 5, "min_count": 1, "max_count": 1 }
+  ],
+  "interval": 30
+}

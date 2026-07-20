@@ -1,0 +1,9 @@
+{
+  "type": "tyco:shop_entry",
+  "item": {
+    "id": "minecraft:iron_axe",
+    "count": 1
+  },
+  "price": 120,
+  "category": "Tools"
+}

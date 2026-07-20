@@ -1,0 +1,9 @@
+{
+  "type": "tyco:shop_entry",
+  "item": {
+    "id": "tyco:netherite_upgrade",
+    "count": 1
+  },
+  "price": 10000,
+  "category": "Upgrades"
+}

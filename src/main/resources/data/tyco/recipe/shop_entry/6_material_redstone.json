@@ -1,0 +1,9 @@
+{
+  "type": "tyco:shop_entry",
+  "item": {
+    "id": "minecraft:redstone",
+    "count": 1
+  },
+  "price": 5,
+  "category": "Materials"
+}

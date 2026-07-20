@@ -1,0 +1,9 @@
+{
+  "type": "tyco:shop_entry",
+  "item": {
+    "id": "tyco:copper_upgrade",
+    "count": 1
+  },
+  "price": 1500,
+  "category": "Upgrades"
+}

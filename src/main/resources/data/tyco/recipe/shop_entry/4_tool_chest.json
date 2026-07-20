@@ -1,0 +1,9 @@
+{
+  "type": "tyco:shop_entry",
+  "item": {
+    "id": "minecraft:chest",
+    "count": 1
+  },
+  "price": 30,
+  "category": "Tools"
+}

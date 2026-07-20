@@ -1,0 +1,9 @@
+{
+  "type": "tyco:generating",
+  "machine": "lumberjack",
+  "blocks": ["minecraft:birch_log"],
+  "coin_input": { "item": "tyco:coal_coin" },
+  "coin_count": 4,
+  "output": { "id": "minecraft:birch_log", "count": 1 },
+  "interval": 20
+}

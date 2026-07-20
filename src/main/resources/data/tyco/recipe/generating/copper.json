@@ -1,0 +1,13 @@
+{
+  "type": "tyco:generating",
+  "machine": "miner",
+  "blocks": ["minecraft:copper_ore", "minecraft:deepslate_copper_ore"],
+  "coin_input": { "item": "tyco:coal_coin" },
+  "coin_count": 4,
+  "output": { "id": "minecraft:raw_copper" },
+  "min_count": 2,
+  "max_count": 2,
+  "bonus_chance": 0.5,
+  "bonus_count": 3,
+  "interval": 20
+}

@@ -1,0 +1,7 @@
+{
+  "type": "tyco:selling",
+  "input": { "item": "minecraft:birch_wood" },
+  "input_count": 1,
+  "output": { "id": "tyco:coal_coin", "count": 2 },
+  "interval": 20
+}

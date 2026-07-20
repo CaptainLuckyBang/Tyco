@@ -1,0 +1,13 @@
+{
+  "type": "tyco:generating",
+  "machine": "miner",
+  "blocks": ["minecraft:diamond_ore", "minecraft:deepslate_diamond_ore"],
+  "coin_input": { "item": "tyco:coal_coin" },
+  "coin_count": 8,
+  "output": { "id": "minecraft:diamond" },
+  "min_count": 1,
+  "max_count": 1,
+  "bonus_chance": 0.05,
+  "bonus_count": 2,
+  "interval": 40
+}

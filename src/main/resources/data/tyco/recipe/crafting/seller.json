@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "IGI",
+    "GCG",
+    "IHI"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_ingot" },
+    "G": { "item": "minecraft:gold_ingot" },
+    "C": { "item": "minecraft:chest" },
+    "H": { "item": "minecraft:hopper" }
+  },
+  "result": {
+    "id": "tyco:seller",
+    "count": 1
+  }
+}

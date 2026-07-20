@@ -1,0 +1,13 @@
+{
+  "type": "tyco:generating",
+  "machine": "miner",
+  "blocks": ["minecraft:emerald_ore", "minecraft:deepslate_emerald_ore"],
+  "coin_input": { "item": "tyco:coal_coin" },
+  "coin_count": 8,
+  "output": { "id": "minecraft:emerald" },
+  "min_count": 1,
+  "max_count": 1,
+  "bonus_chance": 0.05,
+  "bonus_count": 2,
+  "interval": 40
+}

@@ -1,0 +1,9 @@
+{
+  "type": "tyco:shop_entry",
+  "item": {
+    "id": "minecraft:iron_ore",
+    "count": 1
+  },
+  "price": 250,
+  "category": "Ores"
+}

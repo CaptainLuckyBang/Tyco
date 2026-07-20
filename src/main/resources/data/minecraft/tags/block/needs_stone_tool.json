@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "tyco:miner",
+    "tyco:lumberjack",
+    "tyco:seller",
+    "tyco:banker"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "type": "tyco:generating",
+  "machine": "lumberjack",
+  "blocks": ["minecraft:crimson_stem"],
+  "coin_input": { "item": "tyco:coal_coin" },
+  "coin_count": 4,
+  "output": { "id": "minecraft:crimson_stem", "count": 1 },
+  "interval": 20
+}

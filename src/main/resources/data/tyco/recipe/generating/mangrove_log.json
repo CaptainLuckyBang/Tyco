@@ -1,0 +1,9 @@
+{
+  "type": "tyco:generating",
+  "machine": "lumberjack",
+  "blocks": ["minecraft:mangrove_log"],
+  "coin_input": { "item": "tyco:coal_coin" },
+  "coin_count": 4,
+  "output": { "id": "minecraft:mangrove_log", "count": 1 },
+  "interval": 20
+}

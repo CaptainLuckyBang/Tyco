@@ -1,0 +1,6 @@
+{
+  "parent": "tyco:block/generator_base",
+  "textures": {
+    "all": "tyco:block/miner"
+  }
+}

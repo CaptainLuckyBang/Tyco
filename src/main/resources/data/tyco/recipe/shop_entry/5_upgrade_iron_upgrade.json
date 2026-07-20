@@ -1,0 +1,9 @@
+{
+  "type": "tyco:shop_entry",
+  "item": {
+    "id": "tyco:iron_upgrade",
+    "count": 1
+  },
+  "price": 2500,
+  "category": "Upgrades"
+}

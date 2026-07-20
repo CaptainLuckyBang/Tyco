@@ -1,0 +1,9 @@
+{
+  "type": "tyco:shop_entry",
+  "item": {
+    "id": "minecraft:mangrove_log",
+    "count": 1
+  },
+  "price": 8,
+  "category": "Logs"
+}

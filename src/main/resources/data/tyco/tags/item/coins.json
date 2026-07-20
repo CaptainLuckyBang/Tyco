@@ -1,0 +1,10 @@
+{
+  "values": [
+    "tyco:coal_coin",
+    "tyco:copper_coin",
+    "tyco:iron_coin",
+    "tyco:gold_coin",
+    "tyco:diamond_coin",
+    "tyco:netherite_coin"
+  ]
+}

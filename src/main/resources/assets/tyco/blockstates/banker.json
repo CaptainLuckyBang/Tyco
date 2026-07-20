@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "down=false,upgrade_tier=0": { "model": "tyco:block/banker_up_untinted" },
+    "down=false,upgrade_tier=1": { "model": "tyco:block/banker_up" },
+    "down=false,upgrade_tier=2": { "model": "tyco:block/banker_up" },
+    "down=false,upgrade_tier=3": { "model": "tyco:block/banker_up" },
+    "down=false,upgrade_tier=4": { "model": "tyco:block/banker_up" },
+    "down=false,upgrade_tier=5": { "model": "tyco:block/banker_up" },
+    "down=true,upgrade_tier=0": { "model": "tyco:block/banker_down_untinted" },
+    "down=true,upgrade_tier=1": { "model": "tyco:block/banker_down" },
+    "down=true,upgrade_tier=2": { "model": "tyco:block/banker_down" },
+    "down=true,upgrade_tier=3": { "model": "tyco:block/banker_down" },
+    "down=true,upgrade_tier=4": { "model": "tyco:block/banker_down" },
+    "down=true,upgrade_tier=5": { "model": "tyco:block/banker_down" }
+  }
+}

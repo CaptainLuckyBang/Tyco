@@ -1,0 +1,9 @@
+{
+  "type": "tyco:shop_entry",
+  "item": {
+    "id": "minecraft:gold_ingot",
+    "count": 1
+  },
+  "price": 25,
+  "category": "Materials"
+}

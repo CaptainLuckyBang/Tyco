@@ -1,0 +1,9 @@
+{
+  "type": "tyco:shop_entry",
+  "item": {
+    "id": "tyco:seller",
+    "count": 1
+  },
+  "price": 400,
+  "category": "Machines"
+}

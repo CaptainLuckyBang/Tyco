@@ -1,0 +1,11 @@
+{
+  "type": "tyco:generating",
+  "machine": "miner",
+  "blocks": ["minecraft:iron_ore", "minecraft:deepslate_iron_ore"],
+  "coin_input": { "item": "tyco:coal_coin" },
+  "coin_count": 4,
+  "output": { "id": "minecraft:raw_iron" },
+  "min_count": 1,
+  "max_count": 1,
+  "interval": 20
+}

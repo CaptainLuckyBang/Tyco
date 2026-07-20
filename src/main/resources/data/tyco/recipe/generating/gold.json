@@ -1,0 +1,13 @@
+{
+  "type": "tyco:generating",
+  "machine": "miner",
+  "blocks": ["minecraft:gold_ore", "minecraft:deepslate_gold_ore"],
+  "coin_input": { "item": "tyco:coal_coin" },
+  "coin_count": 4,
+  "output": { "id": "minecraft:raw_gold" },
+  "min_count": 1,
+  "max_count": 1,
+  "bonus_chance": 0.05,
+  "bonus_count": 2,
+  "interval": 20
+}

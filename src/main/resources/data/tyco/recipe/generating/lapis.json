@@ -1,0 +1,11 @@
+{
+  "type": "tyco:generating",
+  "machine": "miner",
+  "blocks": ["minecraft:lapis_ore", "minecraft:deepslate_lapis_ore"],
+  "coin_input": { "item": "tyco:coal_coin" },
+  "coin_count": 4,
+  "output": { "id": "minecraft:lapis_lazuli" },
+  "min_count": 4,
+  "max_count": 8,
+  "interval": 20
+}

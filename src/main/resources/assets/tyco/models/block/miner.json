@@ -1,0 +1,7 @@
+{
+  "parent": "tyco:block/generator_tinted_base",
+  "textures": {
+    "all": "tyco:block/miner",
+    "indicator": "tyco:block/miner_indicator"
+  }
+}

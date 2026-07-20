@@ -1,0 +1,9 @@
+{
+  "type": "tyco:shop_entry",
+  "item": {
+    "id": "minecraft:gold_ore",
+    "count": 1
+  },
+  "price": 300,
+  "category": "Ores"
+}

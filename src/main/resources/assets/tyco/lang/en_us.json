@@ -1,0 +1,38 @@
+{
+  "item.tyco.coal_coin": "Coal Coin",
+  "item.tyco.copper_coin": "Copper Coin",
+  "item.tyco.iron_coin": "Iron Coin",
+  "item.tyco.gold_coin": "Gold Coin",
+  "item.tyco.diamond_coin": "Diamond Coin",
+  "item.tyco.netherite_coin": "Netherite Coin",
+
+  "item.tyco.copper_upgrade": "Copper Upgrade",
+  "item.tyco.iron_upgrade": "Iron Upgrade",
+  "item.tyco.gold_upgrade": "Gold Upgrade",
+  "item.tyco.diamond_upgrade": "Diamond Upgrade",
+  "item.tyco.netherite_upgrade": "Netherite Upgrade",
+
+  "block.tyco.miner": "Miner",
+  "block.tyco.lumberjack": "Lumberjack",
+  "block.tyco.seller": "Seller",
+  "block.tyco.banker": "Banker",
+  "block.tyco.shop": "Shop",
+
+  "itemGroup.tyco.tyco_tab": "Tyco",
+
+  "tooltip.tyco.miner.line1": "Place on a matching ore block and feed it coins.",
+  "tooltip.tyco.miner.line2": "Right-click to retrieve stuck items or output.",
+
+  "tooltip.tyco.lumberjack.line1": "Place on a matching log block and feed it coins.",
+  "tooltip.tyco.lumberjack.line2": "Right-click to retrieve stuck items or output.",
+
+  "tooltip.tyco.seller.line1": "Feed it processed materials to sell for coins.",
+  "tooltip.tyco.seller.line2": "Right-click to retrieve stuck items or output.",
+
+  "tooltip.tyco.banker.line1": "Converts coins between tiers.",
+  "tooltip.tyco.banker.line2": "Shift+right-click to toggle up/down mode.",
+  "tooltip.tyco.banker.line3": "Right-click to retrieve stuck items or output.",
+
+  "tooltip.tyco.shop.line1": "Right-click to open the shop and spend your coins.",
+  "tooltip.tyco.shop.line2": "Use /tyco shop_editing_mode to configure items and prices."
+}

@@ -1,0 +1,7 @@
+{
+  "type": "tyco:selling",
+  "input": { "item": "minecraft:spruce_planks" },
+  "input_count": 1,
+  "output": { "id": "tyco:coal_coin", "count": 1 },
+  "interval": 20
+}

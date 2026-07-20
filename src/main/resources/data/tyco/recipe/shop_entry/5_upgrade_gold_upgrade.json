@@ -1,0 +1,9 @@
+{
+  "type": "tyco:shop_entry",
+  "item": {
+    "id": "tyco:gold_upgrade",
+    "count": 1
+  },
+  "price": 4000,
+  "category": "Upgrades"
+}

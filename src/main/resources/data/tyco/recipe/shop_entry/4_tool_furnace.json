@@ -1,0 +1,9 @@
+{
+  "type": "tyco:shop_entry",
+  "item": {
+    "id": "minecraft:furnace",
+    "count": 1
+  },
+  "price": 60,
+  "category": "Tools"
+}
