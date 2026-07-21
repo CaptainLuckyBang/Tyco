@@ -80,6 +80,14 @@ public class SellerBlockEntity extends BlockEntity {
         ItemStack current = be.inventory.getStackInSlot(1);
         ItemStack result = matchedRecipe.assemble(input, level.registryAccess());
 
+        ItemStack soldItemCopy = inputStack.copy();
+        soldItemCopy.setCount(matchedRecipe.inputCount());
+
+        net.luckystudios.tyco.api.SellerSaleEvent saleEvent =
+                new net.luckystudios.tyco.api.SellerSaleEvent(level, pos, soldItemCopy, result);
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(saleEvent);
+        result = saleEvent.getResult();
+
         boolean outputFits = current.isEmpty()
                 || (ItemStack.isSameItemSameComponents(current, result)
                 && current.getCount() + result.getCount() <= current.getMaxStackSize());
