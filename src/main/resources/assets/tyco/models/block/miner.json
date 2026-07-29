@@ -1,7 +1,10 @@
 {
-  "parent": "tyco:block/generator_tinted_base",
+  "parent": "tyco:block/machine_tinted_base",
   "textures": {
-    "all": "tyco:block/miner",
+    "top": "tyco:block/miner_top",
+    "side": "tyco:block/miner_side",
+    "front": "tyco:block/machine_front",
+    "bottom": "tyco:block/machine_bottom",
     "indicator": "tyco:block/miner_indicator"
   }
 }

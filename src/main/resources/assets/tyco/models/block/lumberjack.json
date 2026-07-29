@@ -1,7 +1,10 @@
 {
-  "parent": "tyco:block/generator_tinted_base",
+  "parent": "tyco:block/machine_tinted_base",
   "textures": {
-    "all": "tyco:block/lumberjack",
+    "top": "tyco:block/lumberjack_top",
+    "side": "tyco:block/lumberjack_side",
+    "front": "tyco:block/machine_front",
+    "bottom": "tyco:block/machine_bottom",
     "indicator": "tyco:block/lumberjack_indicator"
   }
 }

@@ -1,10 +1,33 @@
 {
   "variants": {
-    "upgrade_tier=0": { "model": "tyco:block/lumberjack_untinted" },
-    "upgrade_tier=1": { "model": "tyco:block/lumberjack" },
-    "upgrade_tier=2": { "model": "tyco:block/lumberjack" },
-    "upgrade_tier=3": { "model": "tyco:block/lumberjack" },
-    "upgrade_tier=4": { "model": "tyco:block/lumberjack" },
-    "upgrade_tier=5": { "model": "tyco:block/lumberjack" }
+    "upgrade_tier=0,facing=north": { "model": "tyco:block/lumberjack_untinted" },
+    "upgrade_tier=0,facing=east":  { "model": "tyco:block/lumberjack_untinted", "y": 90 },
+    "upgrade_tier=0,facing=south": { "model": "tyco:block/lumberjack_untinted", "y": 180 },
+    "upgrade_tier=0,facing=west":  { "model": "tyco:block/lumberjack_untinted", "y": 270 },
+
+    "upgrade_tier=1,facing=north": { "model": "tyco:block/lumberjack" },
+    "upgrade_tier=1,facing=east":  { "model": "tyco:block/lumberjack", "y": 90 },
+    "upgrade_tier=1,facing=south": { "model": "tyco:block/lumberjack", "y": 180 },
+    "upgrade_tier=1,facing=west":  { "model": "tyco:block/lumberjack", "y": 270 },
+
+    "upgrade_tier=2,facing=north": { "model": "tyco:block/lumberjack" },
+    "upgrade_tier=2,facing=east":  { "model": "tyco:block/lumberjack", "y": 90 },
+    "upgrade_tier=2,facing=south": { "model": "tyco:block/lumberjack", "y": 180 },
+    "upgrade_tier=2,facing=west":  { "model": "tyco:block/lumberjack", "y": 270 },
+
+    "upgrade_tier=3,facing=north": { "model": "tyco:block/lumberjack" },
+    "upgrade_tier=3,facing=east":  { "model": "tyco:block/lumberjack", "y": 90 },
+    "upgrade_tier=3,facing=south": { "model": "tyco:block/lumberjack", "y": 180 },
+    "upgrade_tier=3,facing=west":  { "model": "tyco:block/lumberjack", "y": 270 },
+
+    "upgrade_tier=4,facing=north": { "model": "tyco:block/lumberjack" },
+    "upgrade_tier=4,facing=east":  { "model": "tyco:block/lumberjack", "y": 90 },
+    "upgrade_tier=4,facing=south": { "model": "tyco:block/lumberjack", "y": 180 },
+    "upgrade_tier=4,facing=west":  { "model": "tyco:block/lumberjack", "y": 270 },
+
+    "upgrade_tier=5,facing=north": { "model": "tyco:block/lumberjack" },
+    "upgrade_tier=5,facing=east":  { "model": "tyco:block/lumberjack", "y": 90 },
+    "upgrade_tier=5,facing=south": { "model": "tyco:block/lumberjack", "y": 180 },
+    "upgrade_tier=5,facing=west":  { "model": "tyco:block/lumberjack", "y": 270 }
   }
 }
