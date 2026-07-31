@@ -18,8 +18,17 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import java.util.Optional;
 
-// Purely a data holder loaded via the recipe system - defines how a category tab should look.
-public record ShopCategoryRecipe(String category, Optional<Item> icon) implements Recipe<SingleRecipeInput> {
+public record ShopCategoryRecipe(
+        String category,
+        Optional<Item> icon,
+        Optional<Integer> unlockPrice,     // coin cost to unlock, if using coins
+        Optional<Item> unlockItem,         // item required to unlock, if using an item instead
+        int unlockItemCount                // how many of unlockItem are needed (ignored if unlockItem absent)
+) implements Recipe<SingleRecipeInput> {
+
+    public boolean isLocked() {
+        return unlockPrice.isPresent() || unlockItem.isPresent();
+    }
 
     @Override
     public boolean matches(SingleRecipeInput input, Level level) {
@@ -54,13 +63,27 @@ public record ShopCategoryRecipe(String category, Optional<Item> icon) implement
     public static class Serializer implements RecipeSerializer<ShopCategoryRecipe> {
         public static final MapCodec<ShopCategoryRecipe> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
                 com.mojang.serialization.Codec.STRING.fieldOf("category").forGetter(ShopCategoryRecipe::category),
-                BuiltInRegistries.ITEM.byNameCodec().optionalFieldOf("icon").forGetter(ShopCategoryRecipe::icon)
+                BuiltInRegistries.ITEM.byNameCodec().optionalFieldOf("icon").forGetter(ShopCategoryRecipe::icon),
+                com.mojang.serialization.Codec.INT.optionalFieldOf("unlock_price").forGetter(ShopCategoryRecipe::unlockPrice),
+                BuiltInRegistries.ITEM.byNameCodec().optionalFieldOf("unlock_item").forGetter(ShopCategoryRecipe::unlockItem),
+                com.mojang.serialization.Codec.INT.optionalFieldOf("unlock_item_count", 1).forGetter(ShopCategoryRecipe::unlockItemCount)
         ).apply(inst, ShopCategoryRecipe::new));
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, ShopCategoryRecipe> STREAM_CODEC = StreamCodec.composite(
-                ByteBufCodecs.STRING_UTF8, ShopCategoryRecipe::category,
-                ByteBufCodecs.optional(ByteBufCodecs.registry(Registries.ITEM)), ShopCategoryRecipe::icon,
-                ShopCategoryRecipe::new
+        public static final StreamCodec<RegistryFriendlyByteBuf, ShopCategoryRecipe> STREAM_CODEC = StreamCodec.of(
+                (buf, recipe) -> {
+                    ByteBufCodecs.STRING_UTF8.encode(buf, recipe.category());
+                    ByteBufCodecs.optional(ByteBufCodecs.registry(Registries.ITEM)).encode(buf, recipe.icon());
+                    ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).encode(buf, recipe.unlockPrice());
+                    ByteBufCodecs.optional(ByteBufCodecs.registry(Registries.ITEM)).encode(buf, recipe.unlockItem());
+                    ByteBufCodecs.VAR_INT.encode(buf, recipe.unlockItemCount());
+                },
+                (buf) -> new ShopCategoryRecipe(
+                        ByteBufCodecs.STRING_UTF8.decode(buf),
+                        ByteBufCodecs.optional(ByteBufCodecs.registry(Registries.ITEM)).decode(buf),
+                        ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).decode(buf),
+                        ByteBufCodecs.optional(ByteBufCodecs.registry(Registries.ITEM)).decode(buf),
+                        ByteBufCodecs.VAR_INT.decode(buf)
+                )
         );
 
         @Override

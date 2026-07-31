@@ -17,9 +17,15 @@ public class TycoModClient {
     public TycoModClient(IEventBus modEventBus, ModContainer container) {
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
         modEventBus.addListener(TycoBlockColors::register);
+        modEventBus.addListener((net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers event) -> {
+            event.registerBlockEntityRenderer(net.luckystudios.tyco.block.entity.ModBlockEntities.GENERATOR_BE.get(),
+                    net.luckystudios.tyco.client.GeneratorScreenRenderer::new);
+        });
     }
 
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
     }
+
+
 }

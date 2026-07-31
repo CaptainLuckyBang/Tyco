@@ -14,15 +14,19 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class BankerBlockEntity extends BlockEntity {
-    private final ItemStackHandler inventory = new ItemStackHandler(2) {
+    public static final int INPUT_SLOTS = 9;
+    public static final int OUTPUT_SLOTS = 9;
+    public static final int TOTAL_SLOTS = INPUT_SLOTS + OUTPUT_SLOTS;
+
+    private final ItemStackHandler inventory = new ItemStackHandler(TOTAL_SLOTS) {
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
-            return slot == 0;
+            return slot < INPUT_SLOTS;
         }
 
         @Override
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            if (slot == 0) return ItemStack.EMPTY;
+            if (slot < INPUT_SLOTS) return ItemStack.EMPTY;
             return super.extractItem(slot, amount, simulate);
         }
 
@@ -58,25 +62,101 @@ public class BankerBlockEntity extends BlockEntity {
     public int getUpgradeTier() { return upgradeTier; }
     public void setUpgradeTier(int tier) { this.upgradeTier = tier; setChanged(); }
 
+    // Sums how many of a specific coin tier are currently sitting across all 9 input slots
+    private static long totalOfTier(BankerBlockEntity be, int tierIndex) {
+        var coinItem = CoinTiers.itemAt(tierIndex);
+        long total = 0;
+        for (int i = 0; i < INPUT_SLOTS; i++) {
+            ItemStack stack = be.inventory.getStackInSlot(i);
+            if (stack.is(coinItem)) total += stack.getCount();
+        }
+        return total;
+    }
+
+    // Removes `amount` of a specific coin tier from across the input slots, assuming enough is already confirmed present
+    private static void consumeFromTier(BankerBlockEntity be, int tierIndex, long amount) {
+        var coinItem = CoinTiers.itemAt(tierIndex);
+        long remaining = amount;
+        for (int i = 0; i < INPUT_SLOTS && remaining > 0; i++) {
+            ItemStack stack = be.inventory.getStackInSlot(i);
+            if (stack.is(coinItem)) {
+                int take = (int) Math.min(remaining, stack.getCount());
+                stack.shrink(take);
+                remaining -= take;
+            }
+        }
+    }
+
+    // Attempts to place a result stack into any output slot (stacking onto a matching one if possible).
+    // Returns false if every output slot is full/incompatible, so the caller can bail out without losing the input.
+    private static boolean tryPlaceOutput(BankerBlockEntity be, ItemStack result) {
+        for (int i = INPUT_SLOTS; i < TOTAL_SLOTS; i++) {
+            ItemStack existing = be.inventory.getStackInSlot(i);
+            if (existing.isEmpty()) {
+                be.inventory.setStackInSlot(i, result.copy());
+                return true;
+            }
+            if (ItemStack.isSameItemSameComponents(existing, result)
+                    && existing.getCount() + result.getCount() <= existing.getMaxStackSize()) {
+                existing.grow(result.getCount());
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void tick(Level level, BlockPos pos, BlockState state, BankerBlockEntity be) {
         if (level.isClientSide()) return;
 
-        ItemStack inputStack = be.inventory.getStackInSlot(0);
-        if (inputStack.isEmpty()) {
-            be.cooldown = 0;
-            return;
+        int baseInterval = TycoConfig.CONVERSION_INTERVAL_TICKS.get();
+        int effectiveInterval = Math.max(1, (int) Math.round(baseInterval * INTERVAL_MULT[be.upgradeTier]));
+
+        be.cooldown++;
+        if (be.cooldown < effectiveInterval) return;
+        be.cooldown = 0;
+
+        boolean goingUp = be.direction.equals("up");
+
+        if (goingUp) {
+            for (int tierIndex = 0; tierIndex < CoinTiers.size() - 1; tierIndex++) {
+                int ratio = TycoConfig.getRatio(tierIndex);
+                if (totalOfTier(be, tierIndex) >= ratio) {
+                    ItemStack result = new ItemStack(CoinTiers.itemAt(tierIndex + 1), 1);
+                    if (tryPlaceOutput(be, result)) {
+                        consumeFromTier(be, tierIndex, ratio);
+                        be.setChanged();
+                        return;
+                    }
+                }
+            }
+        } else {
+            for (int tierIndex = CoinTiers.size() - 1; tierIndex >= 1; tierIndex--) {
+                if (totalOfTier(be, tierIndex) >= 1) {
+                    int ratio = TycoConfig.getRatio(tierIndex - 1);
+                    ItemStack result = new ItemStack(CoinTiers.itemAt(tierIndex - 1), ratio);
+                    if (tryPlaceOutput(be, result)) {
+                        consumeFromTier(be, tierIndex, 1);
+                        be.setChanged();
+                        return;
+                    }
+                }
+            }
         }
 
-        int tierIndex = CoinTiers.indexOf(inputStack);
-
-        if (tierIndex != -1) {
-            tickBuiltInConversion(be, inputStack, tierIndex);
-            return;
+        // Fallback: generic data-driven banking recipes, for custom currencies via JSON/KubeJS.
+        // Checks the first non-empty input slot's item type, same spirit as before but now
+        // summed across all input slots holding that same item.
+        ItemStack sampleStack = ItemStack.EMPTY;
+        for (int i = 0; i < INPUT_SLOTS; i++) {
+            ItemStack stack = be.inventory.getStackInSlot(i);
+            if (!stack.isEmpty()) {
+                sampleStack = stack;
+                break;
+            }
         }
+        if (sampleStack.isEmpty()) return;
 
-        // Fallback: generic data-driven banking recipes, for custom currencies via JSON/KubeJS
-        BankerRecipe.Input input = new BankerRecipe.Input(be.direction, inputStack);
-
+        BankerRecipe.Input input = new BankerRecipe.Input(be.direction, sampleStack);
         var allRecipes = level.getRecipeManager().getAllRecipesFor(ModRecipes.BANKING_TYPE.get());
 
         BankerRecipe matchedRecipe = null;
@@ -86,92 +166,28 @@ public class BankerBlockEntity extends BlockEntity {
                 break;
             }
         }
+        if (matchedRecipe == null) return;
 
-        if (matchedRecipe == null) {
-            be.cooldown = 0;
-            return;
+        long totalOfSample = 0;
+        for (int i = 0; i < INPUT_SLOTS; i++) {
+            ItemStack stack = be.inventory.getStackInSlot(i);
+            if (ItemStack.isSameItemSameComponents(stack, sampleStack)) {
+                totalOfSample += stack.getCount();
+            }
         }
+        if (totalOfSample < matchedRecipe.inputCount()) return;
 
-        int effectiveInterval = Math.max(1, (int) Math.round(matchedRecipe.interval() * INTERVAL_MULT[be.upgradeTier]));
-
-        be.cooldown++;
-        if (be.cooldown < effectiveInterval) return;
-        be.cooldown = 0;
-
-        ItemStack current = be.inventory.getStackInSlot(1);
         ItemStack result = matchedRecipe.assemble(input, level.registryAccess());
+        if (!tryPlaceOutput(be, result)) return;
 
-        boolean outputFits = current.isEmpty()
-                || (ItemStack.isSameItemSameComponents(current, result)
-                && current.getCount() + result.getCount() <= current.getMaxStackSize());
-
-        if (!outputFits) return;
-
-        inputStack.shrink(matchedRecipe.inputCount());
-
-        if (current.isEmpty()) {
-            be.inventory.setStackInSlot(1, result);
-        } else {
-            current.grow(result.getCount());
-        }
-
-        be.setChanged();
-    }
-
-    private static void tickBuiltInConversion(BankerBlockEntity be, ItemStack inputStack, int tierIndex) {
-        boolean goingUp = be.direction.equals("up");
-
-        if (goingUp && tierIndex >= CoinTiers.size() - 1) {
-            be.cooldown = 0;
-            return; // already at the top tier
-        }
-        if (!goingUp && tierIndex <= 0) {
-            be.cooldown = 0;
-            return; // already at the bottom tier
-        }
-
-        int consumeCount;
-        int produceCount;
-        int resultTierIndex;
-
-        if (goingUp) {
-            int ratio = TycoConfig.getRatio(tierIndex);
-            resultTierIndex = tierIndex + 1;
-            consumeCount = ratio;
-            produceCount = 1;
-        } else {
-            int ratio = TycoConfig.getRatio(tierIndex - 1);
-            resultTierIndex = tierIndex - 1;
-            consumeCount = 1;
-            produceCount = ratio;
-        }
-
-        if (inputStack.getCount() < consumeCount) {
-            be.cooldown = 0;
-            return;
-        }
-
-        be.cooldown++;
-        int baseInterval = TycoConfig.CONVERSION_INTERVAL_TICKS.get();
-        int effectiveInterval = Math.max(1, (int) Math.round(baseInterval * INTERVAL_MULT[be.upgradeTier]));
-        if (be.cooldown < effectiveInterval) return;
-        be.cooldown = 0;
-
-        ItemStack output = be.inventory.getStackInSlot(1);
-        ItemStack result = new ItemStack(CoinTiers.itemAt(resultTierIndex), produceCount);
-
-        boolean outputFits = output.isEmpty()
-                || (ItemStack.isSameItemSameComponents(output, result)
-                && output.getCount() + result.getCount() <= output.getMaxStackSize());
-
-        if (!outputFits) return;
-
-        inputStack.shrink(consumeCount);
-
-        if (output.isEmpty()) {
-            be.inventory.setStackInSlot(1, result);
-        } else {
-            output.grow(result.getCount());
+        long remaining = matchedRecipe.inputCount();
+        for (int i = 0; i < INPUT_SLOTS && remaining > 0; i++) {
+            ItemStack stack = be.inventory.getStackInSlot(i);
+            if (ItemStack.isSameItemSameComponents(stack, sampleStack)) {
+                int take = (int) Math.min(remaining, stack.getCount());
+                stack.shrink(take);
+                remaining -= take;
+            }
         }
 
         be.setChanged();

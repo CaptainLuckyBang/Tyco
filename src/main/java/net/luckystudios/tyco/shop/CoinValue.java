@@ -17,7 +17,6 @@ public class CoinValue {
         return values;
     }
 
-    // Breaks a coal-coin-equivalent amount into actual coin stacks, largest denomination first
     public static List<ItemStack> makeChangeStacks(long amount) {
         List<ItemStack> result = new ArrayList<>();
         long[] values = computeValues();

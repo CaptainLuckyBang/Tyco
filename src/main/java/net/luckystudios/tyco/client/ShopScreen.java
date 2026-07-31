@@ -133,19 +133,38 @@ public class ShopScreen extends Screen {
             CategoryDisplay cat = categoryDisplays.get(i);
             String categoryName = cat.category();
             boolean hasIcon = cat.iconItemId().isPresent();
+            boolean locked = cat.locked();
 
             int width = hasIcon ? TAB_BUTTON_HEIGHT : TAB_BUTTON_WIDTH;
             Component label = hasIcon ? Component.literal("") : Component.literal(categoryName);
 
             Button tabButton = Button.builder(label, button -> {
-                selectedCategory = categoryName;
-                currentPage = 0;
-                rebuildVisibleList();
-                rebuildShopWidgets();
+                if (locked) {
+                    PacketDistributor.sendToServer(new net.luckystudios.tyco.network.UnlockCategoryPayload(categoryName));
+                } else {
+                    selectedCategory = categoryName;
+                    currentPage = 0;
+                    rebuildVisibleList();
+                    rebuildShopWidgets();
+                }
             }).bounds(tabX, tabY, width, TAB_BUTTON_HEIGHT).build();
 
-            tabButton.active = !categoryName.equals(selectedCategory);
-            tabButton.setTooltip(Tooltip.create(Component.literal(categoryName)));
+            tabButton.active = locked || !categoryName.equals(selectedCategory);
+
+            Component tooltipText;
+            if (locked) {
+                if (cat.unlockPrice().isPresent()) {
+                    tooltipText = Component.literal(categoryName + " - Locked (" + cat.unlockPrice().get() + "c to unlock)");
+                } else if (cat.unlockItemId().isPresent()) {
+                    Item unlockItem = BuiltInRegistries.ITEM.get(cat.unlockItemId().get());
+                    tooltipText = Component.literal(categoryName + " - Locked (requires " + cat.unlockItemCount() + "x " + unlockItem.getDescription().getString() + ")");
+                } else {
+                    tooltipText = Component.literal(categoryName + " - Locked");
+                }
+            } else {
+                tooltipText = Component.literal(categoryName);
+            }
+            tabButton.setTooltip(Tooltip.create(tooltipText));
 
             this.addRenderableWidget(tabButton);
             if (hasIcon) {
@@ -201,8 +220,8 @@ public class ShopScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.drawCenteredString(this.font, "Tyco Shop", panelLeft + PANEL_WIDTH / 2, panelTop + 8, 0xAAAAAA);
 
         // Overlay item icons on top of icon-based tab buttons (vanilla Button only renders text)

@@ -113,10 +113,15 @@ public class SellerBlockEntity extends BlockEntity {
         tag.putInt("upgrade_tier", upgradeTier);
     }
 
+    public static final int INPUT_SLOTS = 1;  // item input
+    public static final int OUTPUT_SLOTS = 1; // coin output
+    public static final int TOTAL_SLOTS = INPUT_SLOTS + OUTPUT_SLOTS;
+
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         inventory.deserializeNBT(registries, tag.getCompound("inventory"));
+        inventory.setSize(TOTAL_SLOTS);
         cooldown = tag.getInt("cooldown");
         upgradeTier = tag.getInt("upgrade_tier");
     }

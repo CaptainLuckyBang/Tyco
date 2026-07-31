@@ -91,27 +91,34 @@ public class BankerBlock extends Block implements EntityBlock {
             }
 
             var inventory = be.getInventory();
-            ItemStack toGive = ItemStack.EMPTY;
-            int slotTaken = -1;
 
-            ItemStack slot1 = inventory.getStackInSlot(1);
-            if (!slot1.isEmpty()) {
-                toGive = slot1;
-                slotTaken = 1;
-            } else {
-                ItemStack slot0 = inventory.getStackInSlot(0);
-                if (!slot0.isEmpty()) {
-                    toGive = slot0;
-                    slotTaken = 0;
+            // Check output slots first (9..17), then input slots (0..8) - same priority as before,
+            // now just looping instead of hardcoding two slot indices
+            int slotTaken = -1;
+            for (int i = BankerBlockEntity.INPUT_SLOTS; i < BankerBlockEntity.TOTAL_SLOTS; i++) {
+                if (!inventory.getStackInSlot(i).isEmpty()) {
+                    slotTaken = i;
+                    break;
+                }
+            }
+            if (slotTaken == -1) {
+                for (int i = 0; i < BankerBlockEntity.INPUT_SLOTS; i++) {
+                    if (!inventory.getStackInSlot(i).isEmpty()) {
+                        slotTaken = i;
+                        break;
+                    }
                 }
             }
 
             if (slotTaken != -1) {
+                ItemStack toGive = inventory.getStackInSlot(slotTaken);
                 inventory.setStackInSlot(slotTaken, ItemStack.EMPTY);
                 if (!player.getInventory().add(toGive)) {
                     player.drop(toGive, false);
                 }
                 be.setChanged();
+            } else {
+                player.displayClientMessage(net.minecraft.network.chat.Component.literal("Nothing to retrieve."), true);
             }
         }
 

@@ -1,0 +1,31 @@
+{
+  "parent": "block/block",
+  "render_type": "minecraft:cutout",
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "down":  { "texture": "#bottom" },
+        "up":    { "texture": "#top" },
+        "north": { "texture": "#front" },
+        "south": { "texture": "#side" },
+        "west":  { "texture": "#side" },
+        "east":  { "texture": "#side" }
+      }
+    },
+    {
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "north": { "texture": "#indicator", "tintindex": 0 },
+        "south": { "texture": "#indicator", "tintindex": 0 },
+        "west":  { "texture": "#indicator", "tintindex": 0 },
+        "east":  { "texture": "#indicator", "tintindex": 0 }
+      }
+    }
+  ],
+  "textures": {
+    "particle": "#side"
+  }
+}

@@ -11,6 +11,7 @@ public class TycoConfig {
     public static final ModConfigSpec.IntValue GOLD_TO_DIAMOND;
     public static final ModConfigSpec.IntValue DIAMOND_TO_NETHERITE;
     public static final ModConfigSpec.IntValue CONVERSION_INTERVAL_TICKS;
+    public static final ModConfigSpec.BooleanValue ENABLE_CATEGORY_LOCKING;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -19,27 +20,31 @@ public class TycoConfig {
 
         COAL_TO_COPPER = builder
                 .comment("How many Coal Coins are needed to convert into 1 Copper Coin")
-                .defineInRange("coalToCopperRatio", 10, 1, 1000000);
+                .defineInRange("coalToCopperRatio", 10, 1, 576);
 
         COPPER_TO_IRON = builder
                 .comment("How many Copper Coins are needed to convert into 1 Iron Coin")
-                .defineInRange("copperToIronRatio", 10, 1, 1000000);
+                .defineInRange("copperToIronRatio", 10, 1, 576);
 
         IRON_TO_GOLD = builder
                 .comment("How many Iron Coins are needed to convert into 1 Gold Coin")
-                .defineInRange("ironToGoldRatio", 10, 1, 1000000);
+                .defineInRange("ironToGoldRatio", 10, 1, 576);
 
         GOLD_TO_DIAMOND = builder
                 .comment("How many Gold Coins are needed to convert into 1 Diamond Coin")
-                .defineInRange("goldToDiamondRatio", 10, 1, 1000000);
+                .defineInRange("goldToDiamondRatio", 10, 1, 576);
 
         DIAMOND_TO_NETHERITE = builder
                 .comment("How many Diamond Coins are needed to convert into 1 Netherite Coin")
-                .defineInRange("diamondToNetheriteRatio", 10, 1, 1000000);
+                .defineInRange("diamondToNetheriteRatio", 10, 1, 576);
 
         CONVERSION_INTERVAL_TICKS = builder
                 .comment("How many ticks the Banker takes to perform one coin tier conversion (20 ticks = 1 second)")
                 .defineInRange("conversionIntervalTicks", 20, 1, 72000);
+
+        ENABLE_CATEGORY_LOCKING = builder
+                .comment("If false, shop categories are always unlocked regardless of unlock_price/unlock_item defined on any tyco:shop_category recipe.")
+                .define("enableCategoryLocking", true);
 
         builder.pop();
 
