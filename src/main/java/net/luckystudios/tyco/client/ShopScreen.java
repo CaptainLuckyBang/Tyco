@@ -27,8 +27,8 @@ public class ShopScreen extends Screen {
     private static final int PANEL_WIDTH = 200;
     private static final int PANEL_HEIGHT = 200;
 
-    private final List<ShopEntry> allEntries;
-    private final List<CategoryDisplay> categoryDisplays;
+    private List<ShopEntry> allEntries;
+    private List<CategoryDisplay> categoryDisplays;
     private String selectedCategory;
 
     private final List<Integer> visibleGlobalIndices = new ArrayList<>();
@@ -234,7 +234,9 @@ public class ShopScreen extends Screen {
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        guiGraphics.drawCenteredString(this.font, "Tyco Shop", panelLeft + PANEL_WIDTH / 2, panelTop + 8, 0xAAAAAA);
+        String title = "Tyco Shop";
+        int titleWidth = this.font.width(title);
+        guiGraphics.drawString(this.font, title, panelLeft + PANEL_WIDTH / 2 - titleWidth / 2, panelTop + 8, 0x404040, false);
 
         for (var entry : iconTabButtons.entrySet()) {
             Button button = entry.getKey();
@@ -255,8 +257,12 @@ public class ShopScreen extends Screen {
                 costLine = "Locked";
             }
 
-            guiGraphics.drawCenteredString(this.font, selectedCategory + " is locked", panelLeft + PANEL_WIDTH / 2, gridTop + 20, 0x1A1A1A);
-            guiGraphics.drawCenteredString(this.font, costLine, panelLeft + PANEL_WIDTH / 2, gridTop + 36, 0xCC7A00);
+            String lockedText = selectedCategory + " is locked";
+            int lockedTextWidth = this.font.width(lockedText);
+            guiGraphics.drawString(this.font, lockedText, panelLeft + PANEL_WIDTH / 2 - lockedTextWidth / 2, gridTop + 20, 0x404040, false);
+
+            int costLineWidth = this.font.width(costLine);
+            guiGraphics.drawString(this.font, costLine, panelLeft + PANEL_WIDTH / 2 - costLineWidth / 2, gridTop + 36, 0xCC7A00, false);
         } else {
             int startIndex = currentPage * ITEMS_PER_PAGE;
             int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, visibleGlobalIndices.size());
@@ -281,16 +287,22 @@ public class ShopScreen extends Screen {
                 int centerX = x + 8;
 
                 if (qty > 1) {
-                    guiGraphics.drawCenteredString(this.font, "x" + qty, centerX, y - 8, 0xAAAAAA);
+                    String qtyText = "x" + qty;
+                    int qtyWidth = this.font.width(qtyText);
+                    guiGraphics.drawString(this.font, qtyText, centerX - qtyWidth / 2, y - 8, 0xAAAAAA, false);
                 }
-                guiGraphics.drawCenteredString(this.font, formatPrice(totalPrice) + "c", centerX, y + 18, 0xCC7A00);
+
+                String priceText = formatPrice(totalPrice) + "c";
+                int priceWidth = this.font.width(priceText);
+                guiGraphics.drawString(this.font, priceText, centerX - priceWidth / 2, y + 18, 0xCC7A00, false);
             }
 
             int maxPage = getMaxPage();
             if (maxPage > 0) {
                 int pageTextY = gridTop + TAB_HEIGHT + ROWS_PER_PAGE * (SLOT_SIZE + 12) + 26;
                 String pageLabel = "Page " + (currentPage + 1) + " / " + (maxPage + 1);
-                guiGraphics.drawCenteredString(this.font, pageLabel, panelLeft + PANEL_WIDTH / 2, pageTextY, 0x555555);
+                int pageLabelWidth = this.font.width(pageLabel);
+                guiGraphics.drawString(this.font, pageLabel, panelLeft + PANEL_WIDTH / 2 - pageLabelWidth / 2, pageTextY, 0x555555, false);
             }
 
             int hoveredGlobalIndex = findHoveredGlobalIndex(mouseX, mouseY);
@@ -355,6 +367,15 @@ public class ShopScreen extends Screen {
         } else {
             return String.valueOf(value);
         }
+    }
+
+    // Called when fresh data arrives (e.g. after a successful unlock) while this screen is already open -
+    // updates the data in place instead of resetting selectedCategory/currentPage/tabPage
+    public void updateData(List<ShopEntry> newEntries, List<CategoryDisplay> newCategories) {
+        this.allEntries = newEntries;
+        this.categoryDisplays = newCategories;
+        rebuildVisibleList();
+        rebuildShopWidgets();
     }
 
     @Override

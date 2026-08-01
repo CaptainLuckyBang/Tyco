@@ -42,10 +42,6 @@ public class TycoConfig {
                 .comment("How many ticks the Banker takes to perform one coin tier conversion (20 ticks = 1 second)")
                 .defineInRange("conversionIntervalTicks", 20, 1, 72000);
 
-        ENABLE_CATEGORY_LOCKING = builder
-                .comment("If false, shop categories are always unlocked regardless of unlock_price/unlock_item defined on any tyco:shop_category recipe.")
-                .define("enableCategoryLocking", true);
-
         builder.pop();
 
         builder.comment("Tyco Shop Settings").push("shop");

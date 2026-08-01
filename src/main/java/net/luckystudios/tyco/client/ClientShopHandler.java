@@ -8,6 +8,12 @@ import java.util.List;
 
 public class ClientShopHandler {
     public static void openShopScreen(List<ShopEntry> entries, List<CategoryDisplay> categories) {
-        Minecraft.getInstance().setScreen(new ShopScreen(entries, categories));
+        var mc = Minecraft.getInstance();
+
+        if (mc.screen instanceof ShopScreen existingScreen) {
+            existingScreen.updateData(entries, categories);
+        } else {
+            mc.setScreen(new ShopScreen(entries, categories));
+        }
     }
 }
