@@ -33,10 +33,18 @@ public record OpenShopPayload(List<ShopEntry> entries, List<CategoryDisplay> cat
             (buf, cat) -> {
                 ByteBufCodecs.STRING_UTF8.encode(buf, cat.category());
                 ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC).encode(buf, cat.iconItemId());
+                ByteBufCodecs.BOOL.encode(buf, cat.locked());
+                ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).encode(buf, cat.unlockPrice());
+                ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC).encode(buf, cat.unlockItemId());
+                ByteBufCodecs.VAR_INT.encode(buf, cat.unlockItemCount());
             },
             (buf) -> new CategoryDisplay(
                     ByteBufCodecs.STRING_UTF8.decode(buf),
-                    ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC).decode(buf)
+                    ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC).decode(buf),
+                    ByteBufCodecs.BOOL.decode(buf),
+                    ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).decode(buf),
+                    ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC).decode(buf),
+                    ByteBufCodecs.VAR_INT.decode(buf)
             )
     );
 
@@ -55,4 +63,6 @@ public record OpenShopPayload(List<ShopEntry> entries, List<CategoryDisplay> cat
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
     }
+
+
 }

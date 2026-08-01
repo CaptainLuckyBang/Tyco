@@ -1,6 +1,7 @@
 package net.luckystudios.tyco.client;
 
 import net.luckystudios.tyco.network.BuyItemPayload;
+import net.luckystudios.tyco.network.UnlockCategoryPayload;
 import net.luckystudios.tyco.shop.CategoryDisplay;
 import net.luckystudios.tyco.shop.ShopEntry;
 import net.minecraft.client.gui.GuiGraphics;
@@ -33,7 +34,6 @@ public class ShopScreen extends Screen {
     private final List<Integer> visibleGlobalIndices = new ArrayList<>();
     private final Map<Integer, Integer> quantities = new HashMap<>();
 
-    // Tracks which icon-tab button corresponds to which item icon, so we can draw the icon on top of the button
     private final Map<Button, ResourceLocation> iconTabButtons = new HashMap<>();
 
     private static final int SLOT_SIZE = 18;
@@ -96,7 +96,22 @@ public class ShopScreen extends Screen {
         return quantities.getOrDefault(globalIndex, 1);
     }
 
+    // Finds the CategoryDisplay matching whichever category is currently selected
+    private CategoryDisplay getSelectedCategoryDisplay() {
+        for (CategoryDisplay cat : categoryDisplays) {
+            if (cat.category().equals(selectedCategory)) return cat;
+        }
+        return null;
+    }
+
+    private boolean isSelectedCategoryLocked() {
+        CategoryDisplay cat = getSelectedCategoryDisplay();
+        return cat != null && cat.locked();
+    }
+
     private int findHoveredGlobalIndex(double mouseX, double mouseY) {
+        if (isSelectedCategoryLocked()) return -1;
+
         int startIndex = currentPage * ITEMS_PER_PAGE;
         int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, visibleGlobalIndices.size());
 
@@ -114,8 +129,6 @@ public class ShopScreen extends Screen {
         return -1;
     }
 
-    // Rebuilds every real Button widget based on current state (selected tab, tabPage, currentPage).
-    // Buttons aren't dynamic, so any state change needs a fresh set.
     private void rebuildShopWidgets() {
         this.clearWidgets();
         iconTabButtons.clear();
@@ -133,10 +146,13 @@ public class ShopScreen extends Screen {
             CategoryDisplay cat = categoryDisplays.get(i);
             String categoryName = cat.category();
             boolean hasIcon = cat.iconItemId().isPresent();
+            boolean locked = cat.locked();
 
             int width = hasIcon ? TAB_BUTTON_HEIGHT : TAB_BUTTON_WIDTH;
             Component label = hasIcon ? Component.literal("") : Component.literal(categoryName);
 
+            // Tabs are always selectable now, locked or not - selecting a locked tab
+            // just shows the unlock prompt instead of the item grid.
             Button tabButton = Button.builder(label, button -> {
                 selectedCategory = categoryName;
                 currentPage = 0;
@@ -145,7 +161,11 @@ public class ShopScreen extends Screen {
             }).bounds(tabX, tabY, width, TAB_BUTTON_HEIGHT).build();
 
             tabButton.active = !categoryName.equals(selectedCategory);
-            tabButton.setTooltip(Tooltip.create(Component.literal(categoryName)));
+
+            Component tooltipText = locked
+                    ? Component.literal(categoryName + " - Locked")
+                    : Component.literal(categoryName);
+            tabButton.setTooltip(Tooltip.create(tooltipText));
 
             this.addRenderableWidget(tabButton);
             if (hasIcon) {
@@ -173,24 +193,35 @@ public class ShopScreen extends Screen {
             this.addRenderableWidget(nextTabButton);
         }
 
-        int maxPage = getMaxPage();
-        if (maxPage > 0) {
-            int pageButtonY = gridTop + TAB_HEIGHT + ROWS_PER_PAGE * (SLOT_SIZE + 12) + 3;
-            int finalCurrentPage = currentPage;
+        CategoryDisplay selected = getSelectedCategoryDisplay();
 
-            Button prevPageButton = Button.builder(Component.literal("< Prev"), button -> {
-                currentPage--;
-                rebuildShopWidgets();
-            }).bounds(gridLeft, pageButtonY, 60, 20).build();
-            prevPageButton.active = finalCurrentPage > 0;
-            this.addRenderableWidget(prevPageButton);
+        if (selected != null && selected.locked()) {
+            // Locked category selected - show a single Unlock button instead of item grid/pagination
+            int unlockButtonY = gridTop + 60;
+            Button unlockButton = Button.builder(Component.literal("Unlock"), button -> {
+                PacketDistributor.sendToServer(new UnlockCategoryPayload(selectedCategory));
+            }).bounds(panelLeft + PANEL_WIDTH / 2 - 40, unlockButtonY, 80, 20).build();
+            this.addRenderableWidget(unlockButton);
+        } else {
+            int maxPage = getMaxPage();
+            if (maxPage > 0) {
+                int pageButtonY = gridTop + TAB_HEIGHT + ROWS_PER_PAGE * (SLOT_SIZE + 12) + 3;
+                int finalCurrentPage = currentPage;
 
-            Button nextPageButton = Button.builder(Component.literal("Next >"), button -> {
-                currentPage++;
-                rebuildShopWidgets();
-            }).bounds(gridLeft + COLUMNS * (SLOT_SIZE + COLUMN_GAP) - 60, pageButtonY, 60, 20).build();
-            nextPageButton.active = finalCurrentPage < maxPage;
-            this.addRenderableWidget(nextPageButton);
+                Button prevPageButton = Button.builder(Component.literal("< Prev"), button -> {
+                    currentPage--;
+                    rebuildShopWidgets();
+                }).bounds(gridLeft, pageButtonY, 60, 20).build();
+                prevPageButton.active = finalCurrentPage > 0;
+                this.addRenderableWidget(prevPageButton);
+
+                Button nextPageButton = Button.builder(Component.literal("Next >"), button -> {
+                    currentPage++;
+                    rebuildShopWidgets();
+                }).bounds(gridLeft + COLUMNS * (SLOT_SIZE + COLUMN_GAP) - 60, pageButtonY, 60, 20).build();
+                nextPageButton.active = finalCurrentPage < maxPage;
+                this.addRenderableWidget(nextPageButton);
+            }
         }
     }
 
@@ -205,68 +236,84 @@ public class ShopScreen extends Screen {
 
         guiGraphics.drawCenteredString(this.font, "Tyco Shop", panelLeft + PANEL_WIDTH / 2, panelTop + 8, 0xAAAAAA);
 
-        // Overlay item icons on top of icon-based tab buttons (vanilla Button only renders text)
         for (var entry : iconTabButtons.entrySet()) {
             Button button = entry.getKey();
             Item item = BuiltInRegistries.ITEM.get(entry.getValue());
             guiGraphics.renderItem(new ItemStack(item), button.getX() + 2, button.getY() + 2);
         }
 
-        int startIndex = currentPage * ITEMS_PER_PAGE;
-        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, visibleGlobalIndices.size());
+        CategoryDisplay selected = getSelectedCategoryDisplay();
 
-        for (int i = startIndex; i < endIndex; i++) {
-            int slotOnPage = i - startIndex;
-            int globalIndex = visibleGlobalIndices.get(i);
-            ShopEntry entry = allEntries.get(globalIndex);
-
-            int col = slotOnPage % COLUMNS;
-            int row = slotOnPage / COLUMNS;
-            int x = gridLeft + col * (SLOT_SIZE + COLUMN_GAP);
-            int y = gridTop + TAB_HEIGHT + row * (SLOT_SIZE + 12);
-
-            Item item = BuiltInRegistries.ITEM.get(entry.itemId());
-            ItemStack stack = new ItemStack(item);
-
-            guiGraphics.renderItem(stack, x, y);
-
-            int qty = quantityFor(globalIndex);
-            long totalPrice = (long) entry.price() * qty;
-            int centerX = x + 8;
-
-            if (qty > 1) {
-                guiGraphics.drawCenteredString(this.font, "x" + qty, centerX, y - 8, 0xAAAAAA);
-            }
-            guiGraphics.drawCenteredString(this.font, formatPrice(totalPrice) + "c", centerX, y + 18, 0xCC7A00);
-        }
-
-        int maxPage = getMaxPage();
-        if (maxPage > 0) {
-            int pageTextY = gridTop + TAB_HEIGHT + ROWS_PER_PAGE * (SLOT_SIZE + 12) + 26;
-            String pageLabel = "Page " + (currentPage + 1) + " / " + (maxPage + 1);
-            guiGraphics.drawCenteredString(this.font, pageLabel, panelLeft + PANEL_WIDTH / 2, pageTextY, 0x555555);
-        }
-
-        int hoveredGlobalIndex = findHoveredGlobalIndex(mouseX, mouseY);
-        if (hoveredGlobalIndex != -1) {
-            ShopEntry hoveredEntry = allEntries.get(hoveredGlobalIndex);
-            Item hoveredItem = BuiltInRegistries.ITEM.get(hoveredEntry.itemId());
-            ItemStack hoveredStack = new ItemStack(hoveredItem);
-
-            int qty = quantityFor(hoveredGlobalIndex);
-            long exactPrice = (long) hoveredEntry.price() * qty;
-
-            List<Component> tooltipLines = new ArrayList<>();
-            tooltipLines.add(hoveredStack.getHoverName());
-            tooltipLines.add(Component.literal("Price: " + exactPrice + "c").withStyle(style -> style.withColor(0xFFD700)));
-            if (qty > 1) {
-                tooltipLines.add(Component.literal("(x" + qty + " @ " + hoveredEntry.price() + "c each)").withStyle(style -> style.withColor(0xAAAAAA)));
+        if (selected != null && selected.locked()) {
+            String costLine;
+            if (selected.unlockPrice().isPresent()) {
+                costLine = "Unlock for " + selected.unlockPrice().get() + "c";
+            } else if (selected.unlockItemId().isPresent()) {
+                Item unlockItem = BuiltInRegistries.ITEM.get(selected.unlockItemId().get());
+                costLine = "Requires " + selected.unlockItemCount() + "x " + unlockItem.getDescription().getString();
+            } else {
+                costLine = "Locked";
             }
 
-            List<net.minecraft.util.FormattedCharSequence> formattedLines = tooltipLines.stream()
-                    .map(Component::getVisualOrderText)
-                    .toList();
-            guiGraphics.renderTooltip(this.font, formattedLines, mouseX, mouseY);
+            guiGraphics.drawCenteredString(this.font, selectedCategory + " is locked", panelLeft + PANEL_WIDTH / 2, gridTop + 20, 0x1A1A1A);
+            guiGraphics.drawCenteredString(this.font, costLine, panelLeft + PANEL_WIDTH / 2, gridTop + 36, 0xCC7A00);
+        } else {
+            int startIndex = currentPage * ITEMS_PER_PAGE;
+            int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, visibleGlobalIndices.size());
+
+            for (int i = startIndex; i < endIndex; i++) {
+                int slotOnPage = i - startIndex;
+                int globalIndex = visibleGlobalIndices.get(i);
+                ShopEntry entry = allEntries.get(globalIndex);
+
+                int col = slotOnPage % COLUMNS;
+                int row = slotOnPage / COLUMNS;
+                int x = gridLeft + col * (SLOT_SIZE + COLUMN_GAP);
+                int y = gridTop + TAB_HEIGHT + row * (SLOT_SIZE + 12);
+
+                Item item = BuiltInRegistries.ITEM.get(entry.itemId());
+                ItemStack stack = new ItemStack(item);
+
+                guiGraphics.renderItem(stack, x, y);
+
+                int qty = quantityFor(globalIndex);
+                long totalPrice = (long) entry.price() * qty;
+                int centerX = x + 8;
+
+                if (qty > 1) {
+                    guiGraphics.drawCenteredString(this.font, "x" + qty, centerX, y - 8, 0xAAAAAA);
+                }
+                guiGraphics.drawCenteredString(this.font, formatPrice(totalPrice) + "c", centerX, y + 18, 0xCC7A00);
+            }
+
+            int maxPage = getMaxPage();
+            if (maxPage > 0) {
+                int pageTextY = gridTop + TAB_HEIGHT + ROWS_PER_PAGE * (SLOT_SIZE + 12) + 26;
+                String pageLabel = "Page " + (currentPage + 1) + " / " + (maxPage + 1);
+                guiGraphics.drawCenteredString(this.font, pageLabel, panelLeft + PANEL_WIDTH / 2, pageTextY, 0x555555);
+            }
+
+            int hoveredGlobalIndex = findHoveredGlobalIndex(mouseX, mouseY);
+            if (hoveredGlobalIndex != -1) {
+                ShopEntry hoveredEntry = allEntries.get(hoveredGlobalIndex);
+                Item hoveredItem = BuiltInRegistries.ITEM.get(hoveredEntry.itemId());
+                ItemStack hoveredStack = new ItemStack(hoveredItem);
+
+                int qty = quantityFor(hoveredGlobalIndex);
+                long exactPrice = (long) hoveredEntry.price() * qty;
+
+                List<Component> tooltipLines = new ArrayList<>();
+                tooltipLines.add(hoveredStack.getHoverName());
+                tooltipLines.add(Component.literal("Price: " + exactPrice + "c").withStyle(style -> style.withColor(0xFFD700)));
+                if (qty > 1) {
+                    tooltipLines.add(Component.literal("(x" + qty + " @ " + hoveredEntry.price() + "c each)").withStyle(style -> style.withColor(0xAAAAAA)));
+                }
+
+                List<net.minecraft.util.FormattedCharSequence> formattedLines = tooltipLines.stream()
+                        .map(Component::getVisualOrderText)
+                        .toList();
+                guiGraphics.renderTooltip(this.font, formattedLines, mouseX, mouseY);
+            }
         }
     }
 
@@ -284,7 +331,6 @@ public class ShopScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        // Real Button widgets (tabs, pagination) handle their own clicks via super -> onPress.
         if (super.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }

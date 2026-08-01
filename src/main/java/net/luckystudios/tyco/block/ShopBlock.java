@@ -2,10 +2,13 @@ package net.luckystudios.tyco.block;
 
 import net.luckystudios.tyco.network.OpenShopPayload;
 import net.luckystudios.tyco.recipe.ModRecipes;
+import net.luckystudios.tyco.recipe.ShopCategoryRecipe;
 import net.luckystudios.tyco.shop.CategoryDisplay;
 import net.luckystudios.tyco.shop.ShopEntry;
+import net.luckystudios.tyco.shop.UnlockedCategoriesData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -38,24 +41,37 @@ public class ShopBlock extends Block {
                 entries.add(new ShopEntry(id, recipe.price(), recipe.category()));
             }
 
-            // Start every category referenced by an entry as text-only by default
-            Map<String, Optional<net.minecraft.resources.ResourceLocation>> categoryIcons = new LinkedHashMap<>();
+            var unlockedData = UnlockedCategoriesData.get(serverLevel);
+
+            Map<String, Optional<ResourceLocation>> categoryIcons = new LinkedHashMap<>();
             for (ShopEntry entry : entries) {
                 categoryIcons.putIfAbsent(entry.category(), Optional.empty());
             }
 
-            // Override with any explicitly defined icons
+            Map<String, ShopCategoryRecipe> categoryRecipes = new LinkedHashMap<>();
             var allCategoryRecipes = serverLevel.getRecipeManager().getAllRecipesFor(ModRecipes.SHOP_CATEGORY_TYPE.get());
             for (var r : allCategoryRecipes) {
                 var recipe = r.value();
-                Optional<net.minecraft.resources.ResourceLocation> iconId = recipe.icon()
-                        .map(BuiltInRegistries.ITEM::getKey);
-                categoryIcons.put(recipe.category(), iconId);
+                categoryIcons.put(recipe.category(), recipe.icon().map(BuiltInRegistries.ITEM::getKey));
+                categoryRecipes.put(recipe.category(), recipe);
             }
 
             List<CategoryDisplay> categories = new ArrayList<>();
             for (var entry : categoryIcons.entrySet()) {
-                categories.add(new CategoryDisplay(entry.getKey(), entry.getValue()));
+                String categoryName = entry.getKey();
+                ShopCategoryRecipe catRecipe = categoryRecipes.get(categoryName);
+
+                boolean isLocked = net.luckystudios.tyco.config.TycoConfig.ENABLE_CATEGORY_LOCKING.get()
+                        && catRecipe != null && catRecipe.isLocked()
+                        && !unlockedData.isUnlocked(player.getUUID(), categoryName);
+
+                Optional<Integer> unlockPrice = catRecipe != null ? catRecipe.unlockPrice() : Optional.empty();
+                Optional<ResourceLocation> unlockItemId = catRecipe != null
+                        ? catRecipe.unlockItem().map(BuiltInRegistries.ITEM::getKey)
+                        : Optional.empty();
+                int unlockItemCount = catRecipe != null ? catRecipe.unlockItemCount() : 1;
+
+                categories.add(new CategoryDisplay(categoryName, entry.getValue(), isLocked, unlockPrice, unlockItemId, unlockItemCount));
             }
 
             PacketDistributor.sendToPlayer(serverPlayer, new OpenShopPayload(entries, categories));

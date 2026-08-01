@@ -11,6 +11,7 @@ public class TycoConfig {
     public static final ModConfigSpec.IntValue GOLD_TO_DIAMOND;
     public static final ModConfigSpec.IntValue DIAMOND_TO_NETHERITE;
     public static final ModConfigSpec.IntValue CONVERSION_INTERVAL_TICKS;
+    public static final ModConfigSpec.BooleanValue ENABLE_CATEGORY_LOCKING;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -43,10 +44,16 @@ public class TycoConfig {
 
         builder.pop();
 
+        builder.comment("Tyco Shop Settings").push("shop");
+
+        ENABLE_CATEGORY_LOCKING = builder
+                .comment("If false, shop categories are always unlocked regardless of unlock_price/unlock_item defined on any tyco:shop_category recipe.")
+                .define("enableCategoryLocking", true);
+
+        builder.pop();
+
         SPEC = builder.build();
     }
-
-
 
     // lowerTierIndex 0 = coal->copper, 1 = copper->iron, etc.
     public static int getRatio(int lowerTierIndex) {
@@ -59,6 +66,4 @@ public class TycoConfig {
             default -> 8;
         };
     }
-
-
 }
