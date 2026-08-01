@@ -68,4 +68,17 @@ public class UnlockedCategoriesData extends SavedData {
     public static UnlockedCategoriesData get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(FACTORY, "tyco_unlocked_categories");
     }
+
+    public void resetAll(UUID player) {
+        unlocked.remove(player);
+        setDirty();
+    }
+
+    public void resetCategory(UUID player, String category) {
+        var set = unlocked.get(player);
+        if (set != null) {
+            set.remove(category);
+            setDirty();
+        }
+    }
 }

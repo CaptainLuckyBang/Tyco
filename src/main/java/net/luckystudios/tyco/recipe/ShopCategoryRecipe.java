@@ -21,9 +21,9 @@ import java.util.Optional;
 public record ShopCategoryRecipe(
         String category,
         Optional<Item> icon,
-        Optional<Integer> unlockPrice,     // coin cost to unlock, if using coins
-        Optional<Item> unlockItem,         // item required to unlock, if using an item instead
-        int unlockItemCount                // how many of unlockItem are needed (ignored if unlockItem absent)
+        Optional<Integer> unlockPrice,
+        Optional<Item> unlockItem,
+        int unlockItemCount
 ) implements Recipe<SingleRecipeInput> {
 
     public boolean isLocked() {

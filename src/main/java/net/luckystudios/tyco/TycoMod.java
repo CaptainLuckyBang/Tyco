@@ -38,7 +38,6 @@ public class TycoMod {
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         modContainer.registerConfig(net.neoforged.fml.config.ModConfig.Type.COMMON, net.luckystudios.tyco.config.TycoConfig.SPEC);
         NeoForge.EVENT_BUS.register(this);
-
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -62,4 +61,8 @@ public class TycoMod {
         }
     }
 
+    @SubscribeEvent
+    public void onRegisterCommands(net.neoforged.neoforge.event.RegisterCommandsEvent event) {
+        net.luckystudios.tyco.command.ShopCommands.register(event);
+    }
 }

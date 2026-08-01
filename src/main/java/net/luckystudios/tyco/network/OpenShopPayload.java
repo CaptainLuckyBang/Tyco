@@ -63,4 +63,6 @@ public record OpenShopPayload(List<ShopEntry> entries, List<CategoryDisplay> cat
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
     }
+
+
 }

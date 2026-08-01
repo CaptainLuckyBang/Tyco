@@ -1,6 +1,5 @@
 package net.luckystudios.tyco.block;
 
-import net.luckystudios.tyco.config.TycoConfig;
 import net.luckystudios.tyco.network.OpenShopPayload;
 import net.luckystudios.tyco.recipe.ModRecipes;
 import net.luckystudios.tyco.recipe.ShopCategoryRecipe;
@@ -62,7 +61,7 @@ public class ShopBlock extends Block {
                 String categoryName = entry.getKey();
                 ShopCategoryRecipe catRecipe = categoryRecipes.get(categoryName);
 
-                boolean isLocked = TycoConfig.ENABLE_CATEGORY_LOCKING.get()
+                boolean isLocked = net.luckystudios.tyco.config.TycoConfig.ENABLE_CATEGORY_LOCKING.get()
                         && catRecipe != null && catRecipe.isLocked()
                         && !unlockedData.isUnlocked(player.getUUID(), categoryName);
 
